@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Mark OS">
+<meta name="application-name" content="Mark OS">
+<meta name="theme-color" content="#050A12">
+<meta name="description" content="Mark's Personal Command Center">
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Mark%20OS%22,%22short_name%22:%22MarkOS%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23050A12%22,%22theme_color%22:%22%23050A12%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'%3E%3Crect%20width='512'%20height='512'%20fill='%23050A12'/%3E%3Ctext%20x='50%25'%20y='55%25'%20dominant-baseline='middle'%20text-anchor='middle'%20font-size='300'%20fill='%230057B7'%3EM%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
+<title>Mark OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050A12;--surface:#0C1421;--card:#101C2E;--border:#1A2D4A;
+  --muted:#3D5470;--dim:#6B8BAF;--text:#E8F2FF;
+  --blue:#0057B7;--teal:#20B2AA;--gold:#FFD700;
+  --red:#E63946;--green:#22C55E;--purple:#8B5CF6;--orange:#F97316;
+  --fh:'Bebas Neue',cursive;--fm:'DM Mono',monospace;--fb:'DM Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);}
+body{color:var(--text);font-family:var(--fb);display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;}
+
+#topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.t-title{font-family:var(--fh);font-size:28px;color:var(--blue);letter-spacing:.04em;line-height:1;}
+.t-title b{color:var(--gold);}
+.t-sub{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.15em;margin-top:2px;}
+.t-sn{font-family:var(--fm);font-size:24px;line-height:1;text-align:right;}
+.t-sl{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.1em;text-align:right;}
+
+#scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#scroll::-webkit-scrollbar{width:3px;}
+#scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.tab{display:none;padding:16px;}
+.tab.on{display:block;}
+
+#nav{background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;}
+.nb{flex:1;background:none;border:none;border-top:2px solid transparent;padding:12px 0 10px;cursor:pointer;text-align:center;}
+.nb.on{border-top-color:var(--gold);}
+.ni{font-size:18px;display:block;margin-bottom:2px;}
+.nl{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.12em;}
+.nb.on .nl{color:var(--gold);}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:12px;}
+.lbl{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.2em;margin-bottom:8px;}
+
+.id-card{background:linear-gradient(135deg,rgba(0,87,183,.18),rgba(32,178,170,.08));border:1px solid rgba(0,87,183,.4);border-left:3px solid var(--blue);border-radius:6px;padding:14px 16px;margin-bottom:12px;}
+.id-text{font-family:var(--fh);font-size:17px;color:var(--text);line-height:1.3;letter-spacing:.03em;}
+.id-q{font-family:var(--fm);font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;}
+
+.bh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.gbtn{font-family:var(--fm);font-size:9px;background:var(--blue);color:var(--text);border:none;border-radius:3px;padding:5px 10px;cursor:pointer;letter-spacing:.1em;}
+.gbtn:disabled{background:var(--border);opacity:.7;cursor:default;}
+.btxt{font-size:13px;line-height:1.8;color:var(--text);font-weight:300;white-space:pre-wrap;}
+.bempty{text-align:center;padding:24px 0;}
+.bei{font-size:36px;margin-bottom:10px;}
+.bet{font-family:var(--fm);font-size:11px;color:var(--muted);letter-spacing:.1em;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.blink{animation:blink 1.5s ease infinite;}
+
+.sg{display:flex;gap:5px;margin-bottom:10px;}
+.sd{flex:1;height:36px;border-radius:4px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:var(--fm);font-size:10px;color:var(--muted);}
+.sd.on{background:var(--blue);border-color:var(--blue);color:var(--bg);font-weight:700;}
+.sd.td{outline:1px solid var(--gold);color:var(--gold);}
+.sd.on.td{background:var(--gold);border-color:var(--gold);color:var(--bg);}
+.sm{font-family:var(--fm);font-size:10px;text-align:center;letter-spacing:.1em;}
+
+.ac{background:rgba(230,57,70,.07);border:1px solid rgba(230,57,70,.3);border-left:3px solid var(--red);border-radius:6px;padding:12px 14px;margin-bottom:12px;}
+.al{font-family:var(--fm);font-size:9px;color:var(--red);letter-spacing:.2em;margin-bottom:5px;}
+.at{font-family:var(--fh);font-size:16px;color:var(--text);letter-spacing:.03em;}
+.as{font-family:var(--fm);font-size:10px;color:var(--muted);margin-top:5px;}
+
+.pc{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px;}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.pl{display:flex;align-items:center;gap:8px;}
+.pn{font-size:13px;font-weight:600;color:var(--text);}
+.pu{font-family:var(--fm);font-size:9px;letter-spacing:.12em;}
+.pr{display:flex;align-items:center;gap:8px;}
+.pp{font-family:var(--fm);font-size:20px;font-weight:700;}
+.pck{width:24px;height:24px;border-radius:4px;background:transparent;border:1.5px solid var(--border);cursor:pointer;font-size:13px;color:var(--bg);display:flex;align-items:center;justify-content:center;}
+.pck.on{background:var(--green);border-color:var(--green);}
+.bt{height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.bf{height:100%;border-radius:2px;transition:width 1s ease;}
+.pb{font-family:var(--fm);font-size:10px;color:var(--muted);line-height:1.5;}
+.pb span{color:var(--dim);}
+
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.pb2{padding:10px 6px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-family:var(--fm);font-size:11px;color:var(--muted);letter-spacing:.08em;}
+.pb2.on{background:rgba(32,178,170,.18);border-color:var(--teal);color:var(--teal);}
+.fl{font-family:var(--fm);font-size:10px;color:var(--green);text-align:center;letter-spacing:.1em;margin-top:2px;}
+.sl2{font-family:var(--fh);font-size:20px;color:var(--teal);margin-bottom:10px;letter-spacing:.03em;}
+.fr{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px;}
+.fp{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.fpn{font-family:var(--fm);font-size:9px;letter-spacing:.12em;}
+textarea.fi{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--fb);font-size:12px;padding:4px 0;resize:none;outline:none;min-height:38px;line-height:1.6;caret-color:var(--gold);}
+textarea.fi::placeholder{color:var(--muted);font-style:italic;}
+.gr{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);border-radius:6px;padding:12px;margin-top:4px;text-align:center;font-family:var(--fm);font-size:10px;color:var(--gold);letter-spacing:.1em;}
+
+.ak{background:rgba(0,87,183,.07);border:1px solid rgba(0,87,183,.2);border-radius:6px;padding:12px;margin-bottom:12px;}
+.akl{font-family:var(--fm);font-size:9px;color:var(--blue);letter-spacing:.15em;margin-bottom:6px;}
+.akr{display:flex;gap:6px;}
+.aki{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--fm);font-size:10px;padding:6px 8px;outline:none;}
+.aks{font-family:var(--fm);font-size:9px;background:var(--blue);color:var(--text);border:none;border-radius:3px;padding:6px 10px;cursor:pointer;letter-spacing:.08em;}
+.akn{font-family:var(--fm);font-size:9px;color:var(--muted);margin-top:6px;}
+
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fu .3s ease both;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div>
+    <div class="t-title">MARK <b>OS</b></div>
+    <div class="t-sub" id="tDate"></div>
+  </div>
+  <div>
+    <div class="t-sn" id="tSN">0<span style="font-size:11px;color:var(--muted)">/7</span></div>
+    <div class="t-sl">STREAK</div>
+  </div>
+</div>
+
+<div id="scroll">
+
+  <!-- BRIEF -->
+  <div id="t-brief" class="tab on">
+    <div class="id-card fu">
+      <div class="lbl">IDENTITY LOCK</div>
+      <div class="id-text">I AM AN OFW WHO BUILDS EMPIRES WHILE THE WORLD SLEEPS.</div>
+      <div class="id-q" id="dq"></div>
+    </div>
+    <div class="card fu" style="animation-delay:.05s">
+      <div class="bh">
+        <div class="lbl" style="margin:0">⚡ AI DAILY BRIEF</div>
+        <button class="gbtn" id="gBtn" onclick="genBrief()">GENERATE</button>
+      </div>
+      <div id="bBody">
+        <div class="bempty"><div class="bei">⚡</div><div class="bet">TAP GENERATE FOR YOUR DAILY PUSH</div></div>
+      </div>
+    </div>
+    <div class="ak fu" style="animation-delay:.08s">
+      <div class="akl">🔑 ANTHROPIC API KEY — UNLOCKS LIVE AI BRIEF</div>
+      <div class="akr">
+        <input class="aki" type="password" id="akIn" placeholder="sk-ant-…">
+        <button class="aks" onclick="saveKey()">SAVE</button>
+      </div>
+      <div class="akn">Stored on device only. Without key, uses pre-written personalized briefs.</div>
+    </div>
+    <div class="card fu" style="animation-delay:.1s">
+      <div class="lbl">🔥 WEEKLY STREAK — TAP EACH DAY YOU EXECUTED</div>
+      <div class="sg" id="sGrid"></div>
+      <div class="sm" id="sMsg"></div>
+    </div>
+    <div class="ac fu" style="animation-delay:.13s">
+      <div class="al">🚨 CRITICAL — VISITCARE PH</div>
+      <div class="at">97% DONE. 5 STEPS FROM LAUNCH.</div>
+      <div class="as">SEC → LGU → BIR → Bank → Xendit → First Provider</div>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div id="t-projects" class="tab">
+    <div class="lbl">🚀 PROJECT WAR ROOM</div>
+    <div id="pCards"></div>
+  </div>
+
+  <!-- EXECUTE -->
+  <div id="t-execute" class="tab">
+    <div class="card fu">
+      <div class="lbl">💪 TODAY'S FITNESS — PPL SPLIT</div>
+      <div class="sl2" id="sched"></div>
+      <div class="pg" id="pplG"></div>
+      <div class="fl" id="fLog"></div>
+    </div>
+    <div class="lbl">🎯 ONE MOVE PER PROJECT — BE SPECIFIC</div>
+    <div id="fRows"></div>
+    <div class="gr">FILL EVERY FIELD. EMPTY FIELDS = EMPTY DAYS.</div>
+  </div>
+
+</div>
+
+<div id="nav">
+  <button class="nb on" onclick="goTab('brief')" id="n-brief"><span class="ni">⚡</span><span class="nl">BRIEF</span></button>
+  <button class="nb" onclick="goTab('projects')" id="n-projects"><span class="ni">🚀</span><span class="nl">PROJECTS</span></button>
+  <button class="nb" onclick="goTab('execute')" id="n-execute"><span class="ni">🎯</span><span class="nl">EXECUTE</span></button>
+</div>
+
+<script>
+const P=[
+  {id:"visitcare",name:"VisitCare PH",e:"🏥",pct:97,phase:"FINAL PUSH",urg:"CRITICAL",uc:"#E63946",c:"#0057B7",blk:"SEC → LGU → BIR → Bank → Xendit → Onboard"},
+  {id:"gabay",name:"Gabay Notes",e:"📖",pct:75,phase:"NEAR LAUNCH",urg:"HIGH",uc:"#FFD700",c:"#FFD700",blk:"Firebase bug + Quote card share feature"},
+  {id:"ofw",name:"@DigitalOFW",e:"📱",pct:45,phase:"BUILDING",urg:"DAILY",uc:"#20B2AA",c:"#20B2AA",blk:"Post every day per Week 1 plan"},
+  {id:"sleep",name:"Sleep Brand",e:"🌙",pct:60,phase:"ACTIVE",urg:"MAINTAIN",uc:"#8B5CF6",c:"#8B5CF6",blk:"Maintain 5-agent content cadence"},
+  {id:"softloop",name:"SoftLoop",e:"🎵",pct:30,phase:"SEEDING",urg:"LOW",uc:"#F97316",c:"#F97316",blk:"2 Suno AI tracks per week"},
+];
+const WD=["M","T","W","T","F","S","S"];
+const PPL=["Push 💪","Pull 🏋️","Legs 🦵","Rest 😴","Push 💪","Pull 🏋️","Legs 🦵"];
+const Q=[
+  "The graveyard is full of 97% done projects.",
+  "Every day unshipped is a day your family waits longer.",
+  "Bukas na lang killed more dreams than any failure.",
+  "OFW grind paid for the idea. Now execute it.",
+  "The SEC office is open. Are you?",
+  "Someone else is building VisitCare right now.",
+  "Financial freedom doesn't negotiate with inaction.",
+];
+const B=[
+  "Mark, you are not building a side hustle. You are building an exit.\n\nVisitCare is 97% done. That last 3% is pure bureaucracy — SEC, LGU, BIR, bank, Xendit. None of it requires brilliance. It requires showing up. Today: call SEC, confirm OPC requirements, schedule the appointment. Not research it. Schedule it.\n\nYou left the Philippines to build something that brings you back on your own terms. Every day VisitCare sits unregistered is another day Filipino families hire unverified caregivers. That's on you. Fix it today.",
+  "The version of you from two years ago couldn't imagine this stack — VisitCare, Gabay Notes, @DigitalOFW, SoftLoop, Sleep Brand. That person was paralyzed by options. You are not him anymore.\n\nBut the version of you from two years ahead is watching right now. He's frustrated. Not because you failed — because you got to 97% and stopped.\n\nHe filed the SEC papers in 30 minutes on a Tuesday. Today is your Tuesday.",
+  "Mark, execution is the only strategy that matters at this stage.\n\nYou have more built than most people ever start. VisitCare has a working platform, a commission model, a design system, a Supabase backend. What it doesn't have is a legal entity. SEC OPC registration is the unlock. Without it, nothing else moves.\n\nStop optimizing what's already built. Register the company. Everything else is noise until that's done.",
+  "The OFW life is a trade — your time for their money, your presence for your family's security. You made that trade so you could build your way out.\n\nVisitCare is the first door. Gabay Notes is the second. @DigitalOFW is the engine. You're not scattered — you're building a portfolio. But portfolios only pay when you ship.\n\nToday: one step forward on VisitCare. Always VisitCare first until it's live.",
+  "Push day. Pull day. Legs day. This is how you think about the gym — systems, not motivation.\n\nApply the same to VisitCare. Today is a SEC day. Not a 'research SEC' day. A 'call or complete the form' day. The system doesn't need you to feel ready. It needs you to execute the next step in sequence.\n\nSEC → LGU → BIR → Bank → Xendit. Pick the next unchecked box. Work it like a rep.",
+  "Financial freedom isn't a feeling. It's income streams that exceed your expenses while you sleep.\n\nYou're building those streams right now — healthcare marketplace, church app, OFW brand, ambient music, sleep wellness. Each one is a future revenue line. The conversion point is launch.\n\nLaunch VisitCare. Everything after gets easier because you'll have proven you can ship.",
+  "The LGU permit feels trivial. That's a trap.\n\nIt is trivial — but only after you've done it. Until then it's the wall between you and Xendit verification. And Xendit is the wall between you and provider onboarding. And that's the wall between you and your first transaction.\n\nAll these walls fall in sequence. SEC first. LGU second. Pull the first link today.",
+  "@DigitalOFW is your distribution engine. Every post you skip is compounding cost — not just a missed day, but lost momentum, lost algorithm signals, lost trust.\n\nVisitCare is the priority but @DigitalOFW must run in parallel. The plan is written. CapCut is on your phone. OmniSocials is connected.\n\nToday: one VisitCare step + one @DigitalOFW post. That's the minimum.",
+  "Gabay Notes is 75% done. That means it's close enough that abandoning it is the worst outcome — too much invested to quit, too little done to monetize.\n\nThe Firebase bug is a technical problem. Technical problems have solutions. The quote card share feature is the viral hook. Without it, launch is quiet. With it, every Filipino church member who shares a verse is your distribution.\n\nAfter VisitCare's step today, 30 minutes on the Firebase error.",
+  "The long game is built from short days.\n\nYou don't need a perfect month. You need a good today. Then a good tomorrow. Stack enough of those and the compound interest kicks in — across your projects, your audience, your income.\n\nToday is one of those days. It doesn't feel significant. It never does. But the version of you who filed the papers, posted the content, and logged the workout — that version wins.",
+  "Most people plan their way into paralysis. You've already built more than most people plan.\n\nThe risk now isn't starting something new. The risk is leaving what's 97% done on the table because the remaining steps are unglamorous.\n\nToday: no new ideas, no new tabs, no new research. One step forward on VisitCare. Just one.",
+  "You are an OFW who codes, creates, builds, and ships — while working full-time in another country.\n\nMost people in your position watch Netflix after work. You're running a healthcare startup, a church app, two content brands, and a music channel.\n\nThe question is not whether you're capable. The question is whether you'll execute fast enough. The answer is today.",
+  "VisitCare is one verified provider away from being a real marketplace. That provider can't onboard without Xendit. Xendit can't verify without a bank account. The bank needs BIR. BIR needs LGU. LGU needs SEC.\n\nThis is a linear chain. You're at the start of it. Pull the first link today. SEC. One action.",
+  "The sleep product is live on Gumroad. SoftLoop has its channel. @DigitalOFW has its plan. Gabay Notes is 75% built. VisitCare is 97% done.\n\nYou are not someone who can't execute. You have executed repeatedly across five projects from a foreign country.\n\nThe only thing left is to finish what you started. VisitCare first. SEC today. Your family is waiting."
+];
+
+const ls=(k)=>localStorage.getItem(k);
+const lss=(k,v)=>localStorage.setItem(k,v);
+const now=new Date();
+const DOW=[6,0,1,2,3,4,5][now.getDay()];
+const DOY=Math.floor((now-new Date(now.getFullYear(),0,0))/86400000);
+const tKey=()=>`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+const wKey=()=>{const s=new Date(now.getFullYear(),0,1);return`${now.getFullYear()}-W${Math.ceil(((now-s)/86400000+s.getDay()+1)/7)}`;};
+
+let streak=JSON.parse(ls(`mk_s_${wKey()}`)||'null')||Array(7).fill(false);
+let fitness=ls(`mk_f_${tKey()}`)||'';
+let focus=JSON.parse(ls(`mk_fo_${tKey()}`)||'{}');
+let done=JSON.parse(ls('mk_d')||'{}');
+
+function init(){
+  document.getElementById('tDate').textContent=now.toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric'}).toUpperCase()+' · COMMAND CENTER';
+  document.getElementById('dq').textContent='"'+Q[now.getDay()]+'"';
+  if(ls('mk_k'))document.getElementById('akIn').value='••••••••••';
+  const sb=ls(`mk_b_${tKey()}`);
+  if(sb)showBrief(sb);
+  renderStreak();renderProjects();renderExecute();
+}
+
+function goTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
+  document.getElementById('t-'+t).classList.add('on');
+  document.getElementById('n-'+t).classList.add('on');
+  document.getElementById('scroll').scrollTop=0;
+}
+
+function renderStreak(){
+  const g=document.getElementById('sGrid');g.innerHTML='';
+  streak.forEach((on,i)=>{
+    const b=document.createElement('button');
+    b.className='sd'+(on?' on':'')+(i===DOW?' td':'');
+    b.textContent=WD[i];b.onclick=()=>togStreak(i);g.appendChild(b);
+  });
+  const n=streak.filter(Boolean).length;
+  const msgs=['TAP TODAY ONCE YOU EXECUTE','1/7 — STARTED. REPEAT.','2/7 — EARLY. STACK MORE.','3/7 — BUILDING. DON\'T STOP.','4/7 — SOLID. PUSH HARDER.','5/7 — ELITE. KEEP GOING.','6/7 — ALMOST. FINISH IT.','🏆 PERFECT WEEK — BUILT DIFFERENT'];
+  const el=document.getElementById('sMsg');
+  el.textContent=msgs[n]||msgs[0];
+  el.style.color=n>=7?'var(--gold)':n>=5?'var(--teal)':n>=3?'var(--dim)':'var(--muted)';
+  const sn=document.getElementById('tSN');
+  sn.innerHTML=n+'<span style="font-size:11px;color:var(--muted)">/7</span>';
+  sn.style.color=n>=5?'var(--gold)':'var(--teal)';
+}
+
+function togStreak(i){streak[i]=!streak[i];lss(`mk_s_${wKey()}`,JSON.stringify(streak));renderStreak();}
+
+async function genBrief(){
+  const btn=document.getElementById('gBtn');
+  btn.disabled=true;btn.textContent='LOADING…';
+  document.getElementById('bBody').innerHTML='<div style="padding:24px 0;text-align:center;font-family:var(--fm);font-size:11px;color:var(--muted);letter-spacing:.1em" class="blink">GENERATING YOUR BRIEF…</div>';
+  const key=ls('mk_k')||'';
+  if(key&&key.startsWith('sk-ant')){
+    try{
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',max_tokens:1000,
+          system:`You are Mark's elite personal strategist. Filipino OFW in the Middle East building digital income toward financial freedom.
+
+Projects by urgency:
+1. VisitCare PH — healthcare marketplace, 97% done. CRITICAL: SEC OPC → LGU → BIR → bank → Xendit → first provider.
+2. Gabay Notes — church app, 75% done. Firebase bug + quote card share feature blocking launch.
+3. @DigitalOFW — Taglish content brand, Week 1 plan ready, post daily.
+4. Sleep Wellness Brand — English content, USA, Gumroad live.
+5. SoftLoop — ambient YouTube, Suno AI, 2 tracks/week.
+
+Personal: PPL fitness. Indie folk on Spotify. Brutal honesty works best.
+
+Write his daily brief: open with a powerful identity sentence, name the #1 move today with specifics, call out avoidance, end with a brutal truth. 3-4 short paragraphs. Under 200 words. No bullets. No headers. Address him as Mark. Make it hit.`,
+          messages:[{role:'user',content:`Today is ${now.toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}. Generate my daily brief. Push me harder than I'd push myself.`}]
+        })
+      });
+      const d=await r.json();
+      const t=d.content?.[0]?.text;
+      if(t){showBrief(t);lss(`mk_b_${tKey()}`,t);}
+      else throw 0;
+    }catch{showFallback();}
+  }else{showFallback();}
+  btn.disabled=false;btn.textContent='REGENERATE';
+}
+
+function showFallback(){const t=B[DOY%B.length];showBrief(t);lss(`mk_b_${tKey()}`,t);}
+function showBrief(t){document.getElementById('bBody').innerHTML='<div class="btxt">'+t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';}
+
+function saveKey(){
+  const v=document.getElementById('akIn').value.trim();
+  if(v&&v!=='••••••••••'){lss('mk_k',v);document.getElementById('akIn').value='••••••••••';alert('API key saved ✓');}
+}
+
+function renderProjects(){
+  const c=document.getElementById('pCards');c.innerHTML='';
+  P.forEach((p,i)=>{
+    const isDone=done[p.id];const pct=isDone?100:p.pct;
+    const d=document.createElement('div');d.className='pc fu';d.style.animationDelay=(i*.06)+'s';
+    d.innerHTML=`<div class="ph"><div class="pl"><div style="font-size:22px">${p.e}</div><div><div class="pn">${p.name}</div><div class="pu" style="color:${p.uc}">${p.urg} · ${p.phase}</div></div></div><div class="pr"><div class="pp" style="color:${isDone?'var(--green)':p.c}">${pct}%</div><button class="pck${isDone?' on':''}" onclick="togDone('${p.id}')">${isDone?'✓':''}</button></div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${isDone?'var(--green)':p.c}99"></div></div><div class="pb"><span>BLOCKER: </span>${p.blk}</div>`;
+    c.appendChild(d);
+  });
+}
+
+function togDone(id){done[id]=!done[id];lss('mk_d',JSON.stringify(done));renderProjects();}
+
+function renderExecute(){
+  document.getElementById('sched').textContent='SCHEDULED: '+PPL[DOW].toUpperCase();
+  const pg=document.getElementById('pplG');pg.innerHTML='';
+  ['Push 💪','Pull 🏋️','Legs 🦵','Rest 😴'].forEach(o=>{
+    const b=document.createElement('button');b.className='pb2'+(fitness===o?' on':'');b.textContent=o;b.onclick=()=>saveFit(o);pg.appendChild(b);
+  });
+  updFitLog();
+  const fr=document.getElementById('fRows');fr.innerHTML='';
+  P.forEach((p,i)=>{
+    const row=document.createElement('div');row.className='fr fu';row.style.animationDelay=(i*.05)+'s';
+    row.innerHTML=`<div class="fp"><span style="font-size:14px">${p.e}</span><span class="fpn" style="color:${p.c}">${p.name.toUpperCase()}</span></div><textarea class="fi" id="f-${p.id}" placeholder="One specific move for ${p.name} today…" rows="2">${focus[p.id]||''}</textarea>`;
+    fr.appendChild(row);
+    setTimeout(()=>{const ta=document.getElementById('f-'+p.id);if(ta)ta.addEventListener('input',e=>saveFocus(p.id,e.target.value));},0);
+  });
+}
+
+function saveFit(v){fitness=v;lss(`mk_f_${tKey()}`,v);document.querySelectorAll('.pb2').forEach(b=>b.classList.toggle('on',b.textContent===v));updFitLog();}
+function updFitLog(){const el=document.getElementById('fLog');el.textContent=fitness?'✓ LOGGED: '+fitness.toUpperCase():'';}
+function saveFocus(id,v){focus[id]=v;lss(`mk_fo_${tKey()}`,JSON.stringify(focus));}
+
+// Register service worker for PWA installability
+if('serviceWorker' in navigator){
+  const sw=`self.addEventListener('install',e=>e.waitUntil(caches.open('markos-v1').then(c=>c.add('/'))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  const blob=new Blob([sw],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(()=>{});
+}
+
+init();
+</script>
+</body>
+</html>
